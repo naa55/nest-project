@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model bookmark {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  title       String
+  description String?
+  link        String
+  userId      Int
+  user        user     @relation(fields: [userId], references: [id], map: "Bookmark_userId_fkey")
+
+  @@index([userId], map: "Bookmark_userId_fkey")
+}
+
+model post {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  title       String
+  description String
+  updatedAt   DateTime
+  userId      Int
+  user        user     @relation(fields: [userId], references: [id], map: "Post_userId_fkey")
+  tag         tag[]    @relation("posttotag")
+
+  @@index([userId], map: "Post_userId_fkey")
+}
+
+model tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique(map: "Tag_name_key")
+  post post[] @relation("posttotag")
+}
+
+model user {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  email     String     @unique(map: "User_email_key")
+  hash      String
+  firstName String?
+  lastName  String
+  bookmark  bookmark[]
+  post      post[]
+}
